@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Expense Tracker | Homes</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #003366;
+      display: flex;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      color: white;
+      padding-top: 20px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      text-align: center;
+      z-index: 1;
+    }
+
+    .sidebar h2 {
+      color: #00d9ff;
+      margin-bottom: 40px;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 15px;
+      font-size: 1.1rem;
+      color: white;
+      text-decoration: none;
+      margin: 10px 0;
+      transition: background-color 0.3s ease;
+    }
+
+    .sidebar a:hover {
+      background-color: #00d9ff;
+      color: #001f3f;
+      font-weight: bold;
+    }
+
+    .main-content {
+      margin-left: 250px;
+      padding: 30px;
+      flex-grow: 1;
+      color: white;
+      z-index: 1;
+    }
+
+    h1 {
+      color: #ffffff;
+      margin-bottom: 20px;
+    }
+
+    .card-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background-color: #ffffff20;
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 20px;
+      color: white;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: #00d9ff;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    canvas#stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>Expense Tracker</h2>
+    <a href="home.html">Home</a> 
+    <a href="dashboard.html">Dashboard</a>
+    <a href="income.html">Income</a>
+    <a href="budget.html">Budget</a>
+  </div>
+
+  <div class="main-content">
+    <h1>💸 Welcome to Your Expense Tracker</h1>
+    <p>Track your income, manage expenses, and monitor your financial activity easily.</p>
+
+    <div class="card-container">
+      <div class="card">
+        <h3>📊 Dashboard</h3>
+        <p>Gives an introduction about our project and developers.</p>
+      </div>
+      <div class="card">
+        <h3>💰 Income</h3>
+        <p>Track all your income sources and keep them organized.</p>
+      </div>
+      <div class="card">
+        <h3>🧾 Budget</h3>
+        <p>Record your spending, categorize it, and see where your money goes.</p>
+      </div>
+    </div>
+</div>
+
+  <canvas id="stars"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      databaseURL: "https://expense-tracker-72c56-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    db.ref("income").once("value").then(snapshot => {
+      const incomeData = snapshot.val();
+      const labels = [];
+      const values = [];
+
+      for (const type in incomeData) {
+        labels.push(type);
+        let total = 0;
+        const entries = incomeData[type];
+        for (const key in entries) {
+          total += parseFloat(entries[key].amount || 0);
+        }
+        values.push(total);
+      }
+
+      new Chart(document.getElementById('incomeBarChart'), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Income Amount',
+            data: values,
+            backgroundColor: '#00d9ff'
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    });
+
+    db.ref("budget/expenses").once("value").then(snapshot => {
+      const labels = [];
+      const data = [];
+
+      snapshot.forEach(child => {
+        labels.push(child.key);
+        data.push(child.val().amount);
+      });
+
+      new Chart(document.getElementById('budgetPieChart'), {
+        type: 'pie',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Expenses',
+            data: data,
+            backgroundColor: [
+              '#00d9ff',
+              '#ff6384',
+              '#ffcd56',
+              '#4bc0c0',
+              '#36a2eb'
+            ]
+          }]
+        },
+        options: {
+          responsive: true
+        }
+      });
+    });
+
+    const canvasStars = document.getElementById('stars');
+    const ctxStars = canvasStars.getContext('2d');
+    let stars = [];
+
+    function resizeCanvas() {
+      canvasStars.width = window.innerWidth;
+      canvasStars.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function createStars(count) {
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvasStars.width,
+          y: Math.random() * canvasStars.height,
+          radius: Math.random() * 1.5 + 0.5,
+          speed: Math.random() * 1.5 + 0.5
+        });
+      }
+    }
+
+    function drawStars() {
+      ctxStars.clearRect(0, 0, canvasStars.width, canvasStars.height);
+      ctxStars.fillStyle = "#ffffff";
+      stars.forEach(star => {
+        ctxStars.beginPath();
+        ctxStars.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctxStars.fill();
+        star.y += star.speed;
+        if (star.y > canvasStars.height) {
+          star.y = 0;
+          star.x = Math.random() * canvasStars.width;
+        }
+      });
+    }
+
+    function animateStars() {
+      drawStars();
+      requestAnimationFrame(animateStars);
+    }
+
+    createStars(100);
+    animateStars();
+  
+  </script>
+</body>
+</html>

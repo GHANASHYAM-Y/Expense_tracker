@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard | Expense Tracker</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #003366;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 250px;
+      background-color: #001f3f;
+      color: white;
+      padding-top: 20px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      text-align: center;
+      z-index: 1;
+    }
+
+    .sidebar h2 {
+      color: #00d9ff;
+      margin-bottom: 40px;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 15px;
+      font-size: 1.1rem;
+      color: white;
+      text-decoration: none;
+      margin: 10px 0;
+      transition: background-color 0.3s ease;
+    }
+
+    .sidebar a:hover {
+      background-color: #00d9ff;
+      color: #001f3f;
+      font-weight: bold;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 250px;
+      padding: 30px;
+      flex-grow: 1;
+      color: white;
+      z-index: 1;
+    }
+
+    h1 {
+      color: #ffffff;
+      margin-bottom: 20px;
+    }
+
+    .project-info, .participant-list, .contributions {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .project-info h3, .participant-list h3, .contributions h3 {
+      color: #00d9ff;
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+
+    .participant-list ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .participant-list li {
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 5px;
+      background-color: rgba(0, 111, 195, 0.7);
+      cursor: pointer;
+    }
+
+    .participant-list li:hover {
+      background-color: #00d9ff;
+      color: #001f3f;
+    }
+
+    .contributions {
+      display: none;
+    }
+
+    .contributions ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .contributions li {
+      padding: 8px;
+      margin-bottom: 6px;
+      background-color: rgba(0, 174, 255, 0.6);
+      border-radius: 5px;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>fe
+<body>
+
+<canvas id="starCanvas"></canvas>
+
+<div class="sidebar">
+  <h2>Expense Tracker</h2>
+  <a href="home.html">Home</a>
+  <a href="dashboard.html">Dashboard</a>
+  <a href="income.html">Income</a>
+  <a href="budget.html">Budget</a>
+</div>
+
+<div class="main-content">
+  <h1>Dashboard</h1>
+
+  <div class="project-info">
+    <h3>About the Project</h3>
+    <p>This Expense Tracker Project is designed to help individuals track their expenses, manage their budgets, and monitor their income. It offers tools to track income, expenses, and budget limits. Users can set their budgets and track their financial health through a user-friendly interface. This project is built with modern web technologies including HTML, CSS, and JavaScript.</p>
+  </div>
+
+  <div class="participant-list">
+    <h3>Project Participants</h3>
+    <ul>
+      <li onclick="showContributions('Ghanashyam')">Ghanashyam - 22112013</li>
+      <li onclick="showContributions('Shravya')">Shravya - 22112023</li>
+      <li onclick="showContributions('Sushma')">Sushma - 22112375</li>
+    </ul>
+  </div>
+
+  <div id="Ghanashyam" class="contributions">
+    <h3>Contributions by Ghanashyam </h3>
+    <ul>
+      <li>Responsible for setting up and integrating the Firebase database, including storing and retrieving income and expense data.</li>
+      <li>Also contributed to a part of the front-end development, especially in connecting UI elements with the backend.</li>
+    </ul>
+  </div>
+
+  <div id="Shravya" class="contributions">
+    <h3>Contributions by Shravya </h3>
+    <ul>
+      <li>Designed the front-end canvas animation for the starry background effect, adding aesthetic value to the user interface.</li>
+      <li>Enhanced the user experience through interactive and animated visuals.</li>
+    </ul>
+  </div>
+
+  <div id="Sushma" class="contributions">
+    <h3>Contributions by Sushma</h3>
+    <ul>
+      <li>Conducted testing to ensure all modules were functioning correctly and the user interface was bug-free.</li>
+      <li>Handled report and presentation works and clearly documenting the features and functionality of the app</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  function showContributions(id) {
+    const sections = document.querySelectorAll('.contributions');
+    sections.forEach(section => section.style.display = 'none');
+    document.getElementById(id).style.display = 'block';
+  }
+
+  const canvas = document.getElementById('starCanvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function createStars() {
+    for (let i = 0; i < 100; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 2,
+        speed: Math.random() * 0.5 + 0.2
+      });
+    }
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#fff';
+    for (let star of stars) {
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    moveStars();
+    requestAnimationFrame(drawStars);
+  }
+
+  function moveStars() {
+    for (let star of stars) {
+      star.y += star.speed;
+      if (star.y > canvas.height) {
+        star.y = 0;
+        star.x = Math.random() * canvas.width;
+      }
+    }
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+  createStars();
+  drawStars();
+</script>
+
+</body>
+</html>
